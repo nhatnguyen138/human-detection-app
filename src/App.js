@@ -3,10 +3,11 @@ import "@tensorflow/tfjs-backend-cpu";
 import * as cocoSsd from "@tensorflow-models/coco-ssd";
 import styled from 'styled-components'
 
-
 const AppContainer = styled.div`
-  width: 100%;
+  width: calc(100% + 16px);
   height: 100%;
+  min-height: 100vh;
+  margin: -8px;
   background-color: #1c2127;
   display: flex;
   flex-direction: column;
@@ -15,28 +16,43 @@ const AppContainer = styled.div`
   color: #fff;
 `;
 
-const ObjectDetectorContainer = styled.div`
+const HumanDetectorContainer = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
 `;
 
-const DetectorContainer = styled.div`
+const ImageContainer = styled.div`
   min-width: 200px;
-  height: 500px;
+  max-width: 90vw;
+  max-height: 700px;
   border: 3px solid #fff;
   border-radius: 5px;
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
+
+  &::before {
+    content: "Human Detection App";
+    background-color: #fff;
+    padding: 2px;
+    margin-top: -5px;
+    margin-left: 5px;
+    color: black;
+    font-weight: 500;
+    font-size: 17px;
+    position: absolute;
+    top: -1.5em;
+    left: -5px;
+  }
 `;
 
 const TargetImg = styled.img`
   height: 100%;
 `;
 
-const HiddenFileInput = styled.input`
+const FileLoader = styled.input`
   display: none;
 `;
 
@@ -67,13 +83,42 @@ const TargetBox = styled.div`
   width: ${({ width }) => width + "px"};
   height: ${({ height }) => height + "px"};
 
+  border: 4px solid #e3e3dc;
+  background-color: transparent;
+  z-index: 20;
+
+  &::before {
+    content: "${({ classType, score }) => `${classType} ${score.toFixed(1)}%`}";
+    background-color: #e3e3dc;
+    padding: 2px;
+    margin-top: -5px;
+    color: black;
+    font-weight: 500;
+    font-size: 17px;
+    position: absolute;
+    top: -1.5em;
+    left: -5px;
+  }
+`;
+
+const HumanTargetBox = styled.div`
+  position: absolute;
+
+  left: ${({ x }) => x + "px"};
+  top: ${({ y }) => y + "px"};
+  width: ${({ width }) => width + "px"};
+  height: ${({ height }) => height + "px"};
+
   border: 4px solid #1ac71a;
   background-color: transparent;
   z-index: 20;
 
   &::before {
     content: "${({ classType, score }) => `${classType} ${score.toFixed(1)}%`}";
-    color: #1ac71a;
+    background-color: #1ac71a;
+    padding: 2px;
+    margin-top: -5px;
+    color: white;
     font-weight: 500;
     font-size: 17px;
     position: absolute;
@@ -155,31 +200,55 @@ export default function App() {
   };
   return (
     <AppContainer>
-      <ObjectDetectorContainer>
-        <DetectorContainer>
-          {imgData && <TargetImg src={imgData} ref={imageRef} />}
+      <HumanDetectorContainer>
+        <ImageContainer>
+          {imgData && <TargetImg src={imgData} ref={imageRef} style={{width:"min(90vw,100%)", maxHeight:"700px"}} />}
           {!isEmptyPredictions &&
-            predictions.map((prediction, idx) => (
-              <TargetBox
-                key={idx}
-                x={prediction.bbox[0]}
-                y={prediction.bbox[1]}
-                width={prediction.bbox[2]}
-                height={prediction.bbox[3]}
-                classType={prediction.class}
-                score={prediction.score * 100}
-              />
-            ))}
-        </DetectorContainer>
-        <HiddenFileInput
+            <>
+              {
+                predictions.map((prediction, idx) => {
+                  if (prediction.class !== "person")
+                    return (
+                      <TargetBox
+                        key={idx}
+                        x={prediction.bbox[0]}
+                        y={prediction.bbox[1]}
+                        width={prediction.bbox[2]}
+                        height={prediction.bbox[3]}
+                        classType={prediction.class}
+                        score={prediction.score * 100}
+                      />
+                    )
+                })
+              }
+              {
+                predictions.map((prediction, idx) => {
+                  if (prediction.class === "person")
+                    return (
+                      <HumanTargetBox
+                        key={idx}
+                        x={prediction.bbox[0]}
+                        y={prediction.bbox[1]}
+                        width={prediction.bbox[2]}
+                        height={prediction.bbox[3]}
+                        classType={prediction.class}
+                        score={prediction.score * 100}
+                      />
+                    )
+                })
+              }
+            </> 
+          }
+        </ImageContainer>
+        <FileLoader
           type="file"
           ref={fileInputRef}
           onChange={onSelectImage}
         />
         <SelectButton onClick={openFilePicker}>
-          {isLoading ? "Recognizing..." : "Select Image"}
+          {isLoading ? "Analysing..." : "Select Image"}
         </SelectButton>
-      </ObjectDetectorContainer>
+      </HumanDetectorContainer>
     </AppContainer>
   )
 }
