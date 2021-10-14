@@ -5,7 +5,7 @@ This project was my own take on building a human detection app using Tensorflow.
 ## Packages
 This software uses CocoSSD from [TensorFlow](https://github.com/tensorflow/tensorflow).
 <br />
-Additionally, it also uses styled-component paackage in order to conveniently style components within the software.
+Additionally, it also uses styled-component package in order to conveniently style components within the software.
 
 ## Clone & Deployment
 For clone & deployment, simply get to a directory and type these command into the terminal
