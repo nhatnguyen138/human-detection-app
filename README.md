@@ -8,7 +8,7 @@ This software uses CocoSSD from [TensorFlow](https://github.com/tensorflow/tenso
 Additionally, it also uses styled-component package in order to conveniently style components within the software.
 
 ## Clone & Deployment
-For clone & deployment, simply get to a directory and type these command into the terminal
+For clone & deployment, simply get to a directory and type these commands into the terminal
 ``` Linux
 $ git clone https://github.com/nhatnguyen9813/human-detection-app.git
 $ cd human-detection-app
